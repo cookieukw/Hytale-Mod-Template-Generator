@@ -15,19 +15,8 @@ import {
   } from './templates.js';
   import { buildLicense } from './licenses.js';
   import { slugifyProjectName } from './string-utils.js';
-  import { resolveGradleWrapperJar } from './wrapper.js';
+  import { resolveGradleWrapperAssets } from './wrapper.js';
   import type { ProjectInput } from '../types.js';
-
-  const GRADLEW_SH = `#!/bin/sh
-  set -eu
-  DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
-  exec java -classpath "$DIR/gradle/wrapper/gradle-wrapper.jar" org.gradle.wrapper.GradleWrapperMain "$@"
-  `;
-  
-  const GRADLEW_BAT = `@echo off
-  set DIR=%~dp0
-  java -classpath "%DIR%gradle\\wrapper\\gradle-wrapper.jar" org.gradle.wrapper.GradleWrapperMain %*
-  `;
   
   export interface GeneratedProjectFile {
     path: string;
@@ -113,10 +102,12 @@ import {
       add(manifestFile.path, manifestFile.contents);
     }
   
+    const wrapperAssets = await resolveGradleWrapperAssets();
+
     add('gradle/wrapper/gradle-wrapper.properties', buildGradleWrapperProperties());
-    add('gradle/wrapper/gradle-wrapper.jar', await resolveGradleWrapperJar(), { binary: true });
-    add('gradlew', GRADLEW_SH, { executable: true });
-    add('gradlew.bat', GRADLEW_BAT);
+    add('gradle/wrapper/gradle-wrapper.jar', wrapperAssets.jar, { binary: true });
+    add('gradlew', wrapperAssets.gradlew, { executable: true });
+    add('gradlew.bat', wrapperAssets.gradlewBat);
   
     if (data.versionCatalogMode !== 'none') {
       add('gradle/libs.versions.toml', buildVersionCatalog(data));

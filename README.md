@@ -29,7 +29,7 @@ The generator supports both standalone single-mod projects and multi-project wor
 - **Flexible build configuration** — choose between Groovy DSL and Kotlin DSL, Java or Kotlin as the project language, and three version catalog modes (`none`, `basic`, `rich`).
 - **Standalone or multi-project generation** — generate either a traditional standalone mod project or a multi-project Hytale workspace with a shared `common` module and multiple mod subprojects.
 - **Per-module publishing configuration** — multi-project workspaces can generate separate HytalePublisher project IDs/slugs for each mod module, allowing every module to publish independently.
-- **Full Gradle wrapper bundling** — the server fetches and caches `gradle-wrapper.jar` from GitHub so the downloaded project works offline without requiring a Gradle installation.
+- **Official Gradle wrapper bundling** — the server runs Gradle's wrapper task for the configured Gradle distribution, then caches the generated `gradlew`, `gradlew.bat`, and `gradle-wrapper.jar` files so downloaded projects include the official wrapper scripts.
 - **Manifest generation** — produces a `manifest.json` with correct dependency maps, CurseForge ID, pack inclusion flag, and disabled-by-default support.
 - **License file generation** — supports 15 open-source licenses plus a Proprietary option (MIT, Apache-2.0, GPL-3.0, AGPL-3.0, and more).
 - **ZIP download** — the entire scaffolded project is streamed directly to the browser as a ZIP archive with UNIX permissions set on `gradlew`.
@@ -128,13 +128,14 @@ The frontend is a single-page React application. In development the Vite dev ser
 
 ## Prerequisites
 
-| Tool    | Minimum version | Notes                                                                 |
-|---------|-----------------|-----------------------------------------------------------------------|
-| Node.js | 22 LTS          | 24 LTS recommended                                                    |
-| npm     | 10              | Comes with Node 20+                                                   |
-| Java    | 25              | Required only to **run** the generated projects, not to run this tool |
+| Tool    | Minimum version   | Notes                                                                                                          |
+|---------|-------------------|----------------------------------------------------------------------------------------------------------------|
+| Node.js | 22 LTS            | 24 LTS recommended                                                                                             |
+| npm     | 10                | Comes with Node 20+                                                                                            |
+| Java    | 25                | Required by the server when generating official Gradle wrapper assets and by generated projects at build time. |
+| Gradle  | 9.5.1 recommended | Used by the server to run `gradle wrapper --gradle-version ...` the first time wrapper assets are generated.   |
 
-No global npm packages are required. All tooling (`tsx`, `vite`, `tsc`) is installed locally as dev dependencies.
+No global npm packages are required. All Node tooling (`tsx`, `vite`, `tsc`) is installed locally as dev dependencies. Java and a `gradle` command must be available to the backend process so it can generate official Gradle wrapper assets on the first request for a Gradle version.
 
 ---
 
@@ -170,6 +171,8 @@ The minimum viable `.env` for local development is:
 PORT=3001
 APP_ORIGIN=http://localhost:5173
 GRADLE_DISTRIBUTION_URL=https://services.gradle.org/distributions/gradle-9.5.1-bin.zip
+# Optional when Gradle is not on the Node process PATH, for example SDKMAN installs:
+# GRADLE_COMMAND=/root/.sdkman/candidates/gradle/9.5.1/bin/gradle
 ```
 
 ### 4. Start the development servers
@@ -185,7 +188,7 @@ This runs both the backend and frontend concurrently using `npm-run-all`:
 
 The Vite proxy (`/api → http://localhost:3001`) is configured in `frontend/vite.config.ts`. If you change `PORT` in `.env`, update the proxy target to match.
 
-> **Note on the Gradle wrapper cache:** The first time you generate a project the server will fetch `gradle-wrapper.jar` from GitHub and cache it in `server/cache/`. Subsequent generations reuse the cached file.
+> **Note on the Gradle wrapper cache:** The first time you generate a project for a Gradle version, the server runs `gradle wrapper --gradle-version <version> --distribution-type <bin|all>` in a temporary directory and caches the generated `gradlew`, `gradlew.bat`, and `gradle-wrapper.jar` under `server/cache/`. Subsequent generations reuse the cached official wrapper assets. If you change `GRADLE_DISTRIBUTION_URL`, the derived version/distribution cache key changes and the server regenerates the assets.
 
 ---
 
@@ -193,14 +196,15 @@ The Vite proxy (`/api → http://localhost:3001`) is configured in `frontend/vit
 
 All variables are read from `server/.env` (loaded by `dotenv` at startup). Every variable has a sensible default so the server starts without a `.env` file during development.
 
-| Variable                      | Default                                                          | Description                                                                                                                          |
-|-------------------------------|------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
-| `PORT`                        | `3001`                                                           | Port the Express server listens on.                                                                                                  |
-| `APP_ORIGIN`                  | `*`                                                              | CORS allowed origin. Set to your frontend URL in production (e.g. `https://yoursite.com`). `*` allows all origins.                   |
-| `GRADLE_DISTRIBUTION_URL`     | `https://services.gradle.org/distributions/gradle-9.5.1-bin.zip` | Gradle distribution URL embedded in generated `gradle-wrapper.properties`. The server derives the wrapper JAR version from this URL. |
-| `HYTALE_MAVEN_RELEASE_URL`    | `https://maven.hytale.com/release`                               | Base URL of the Hytale Maven release repository, used to fetch available versions.                                                   |
-| `HYTALE_MAVEN_PRERELEASE_URL` | `https://maven.hytale.com/pre-release`                           | Base URL of the Hytale Maven pre-release repository.                                                                                 |
-| `SHOW_STATUS_BANNER`          | *(unset / false)*                                                | Set to `true` to show a live status banner in the UI (useful for maintenance notices).                                               |
+| Variable                      | Default                                                          | Description                                                                                                                                                                                     |
+|-------------------------------|------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `PORT`                        | `3001`                                                           | Port the Express server listens on.                                                                                                                                                             |
+| `APP_ORIGIN`                  | `*`                                                              | CORS allowed origin. Set to your frontend URL in production (e.g. `https://yoursite.com`). `*` allows all origins.                                                                              |
+| `GRADLE_DISTRIBUTION_URL`     | `https://services.gradle.org/distributions/gradle-9.5.1-bin.zip` | Gradle distribution URL embedded in generated `gradle-wrapper.properties`. The server derives the wrapper version and distribution type from this URL.                                          |
+| `GRADLE_COMMAND`              | `gradle`                                                         | Command used by the server to run the Gradle wrapper task. Set this to an absolute path such as `/root/.sdkman/candidates/gradle/9.5.1/bin/gradle` if `gradle` is not on the Node process PATH. |
+| `HYTALE_MAVEN_RELEASE_URL`    | `https://maven.hytale.com/release`                               | Base URL of the Hytale Maven release repository, used to fetch available versions.                                                                                                              |
+| `HYTALE_MAVEN_PRERELEASE_URL` | `https://maven.hytale.com/pre-release`                           | Base URL of the Hytale Maven pre-release repository.                                                                                                                                            |
+| `SHOW_STATUS_BANNER`          | *(unset / false)*                                                | Set to `true` to show a live status banner in the UI (useful for maintenance notices).                                                                                                          |
 
 ---
 
@@ -401,6 +405,8 @@ A minimal production `.env`:
 PORT=3001
 APP_ORIGIN=https://yoursite.com
 GRADLE_DISTRIBUTION_URL=https://services.gradle.org/distributions/gradle-9.5.1-bin.zip
+# Optional, but recommended when Gradle is installed through SDKMAN:
+# GRADLE_COMMAND=/root/.sdkman/candidates/gradle/9.5.1/bin/gradle
 ```
 
 ### Reverse proxy (recommended)
@@ -422,29 +428,69 @@ server {
 
 ### Docker (optional)
 
-A minimal single-stage `Dockerfile` you can use as a starting point:
+The Docker runtime image must include Node.js, Java 25, and a Gradle command. The included `Dockerfile` keeps the Node build stages and copies Java/Gradle from the official Gradle image into the final Node runtime image. This lets the server generate official Gradle wrapper assets when the cache is empty.
 
 ```dockerfile
-FROM node:22-alpine AS build
-WORKDIR /app
-COPY package*.json ./
-COPY frontend/package.json ./frontend/
-COPY server/package.json ./server/
-RUN npm install
-COPY . .
-RUN npm run build
+# syntax=docker/dockerfile:1
 
-FROM node:22-alpine
+FROM node:24-alpine AS deps
 WORKDIR /app
-COPY --from=build /app/server/dist ./server/dist
-COPY --from=build /app/server/cache ./server/cache
-COPY --from=build /app/frontend/dist ./frontend/dist
-COPY --from=build /app/server/package.json ./server/package.json
-COPY --from=build /app/package.json ./package.json
-RUN npm install --omit=dev --workspace server
+
+COPY package*.json ./
+COPY frontend/package*.json frontend/
+COPY server/package*.json server/
+
+RUN npm ci
+
+FROM deps AS build
+WORKDIR /app
+
+COPY . .
+
+RUN npm run build
+RUN npm prune --omit=dev
+
+FROM gradle:9.5.1-jdk25-alpine AS gradle-runtime
+
+FROM node:24-alpine AS runtime
+WORKDIR /app
+
 ENV NODE_ENV=production
-EXPOSE 3001
-CMD ["node", "server/dist/index.js"]
+ENV PORT=3000
+ENV APP_ORIGIN=*
+ENV GRADLE_DISTRIBUTION_URL=https://services.gradle.org/distributions/gradle-9.5.1-bin.zip
+ENV JAVA_HOME=/opt/java/openjdk
+ENV GRADLE_HOME=/opt/gradle
+ENV GRADLE_COMMAND=/opt/gradle/bin/gradle
+ENV PATH="${JAVA_HOME}/bin:${GRADLE_HOME}/bin:${PATH}"
+
+COPY --from=gradle-runtime /opt/java/openjdk /opt/java/openjdk
+COPY --from=gradle-runtime /opt/gradle /opt/gradle
+
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/server/package*.json ./server/
+COPY --from=build /app/server/dist ./server/dist
+COPY --from=build /app/frontend/dist ./frontend/dist
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1
+
+CMD ["npm", "start"]
+```
+
+With Docker Compose, keep `GRADLE_DISTRIBUTION_URL` and `GRADLE_COMMAND` in the service environment so the container uses the same Gradle version for wrapper asset generation and generated project metadata.
+
+```yaml
+environment:
+  NODE_ENV: production
+  PORT: 3000
+  APP_ORIGIN: "*"
+  SHOW_STATUS_BANNER: "true"
+  GRADLE_DISTRIBUTION_URL: "https://services.gradle.org/distributions/gradle-9.5.1-bin.zip"
+  GRADLE_COMMAND: "/opt/gradle/bin/gradle"
 ```
 
 ---
@@ -473,7 +519,7 @@ hytale-generator-webapp/
     ├── .env                       # Local environment (not committed)
     ├── package.json
     ├── tsconfig.json
-    ├── cache/                     # Gradle wrapper JAR cache (auto-created)
+    ├── cache/                     # Official Gradle wrapper asset cache (auto-created)
     └── src/
         ├── index.ts               # Express app setup and server listen
         ├── config.ts              # Typed config from environment variables
@@ -490,15 +536,29 @@ hytale-generator-webapp/
             ├── licenses.ts        # License text for all supported identifiers
             ├── string-utils.ts    # slugify, escapeJava, parseMainClass helpers
             ├── versions.ts        # Hytale Maven version fetcher with fallback
-            └── wrapper.ts         # Gradle wrapper JAR fetcher and cache
+            └── wrapper.ts         # Official Gradle wrapper asset generator and cache
 ```
 
 ---
 
 ## Troubleshooting
 
-**`Could not fetch gradle-wrapper.jar`**
-The server fetches the JAR from GitHub on first run. If your server has no outbound internet access, copy a `gradle-wrapper-<version>.jar` into `server/cache/` manually and restart.
+**`Failed to generate Gradle wrapper assets`**
+The server could not run the Gradle wrapper task. Verify Java and Gradle are available to the same process that runs the backend:
+
+```bash
+java --version
+gradle -v
+```
+
+If Gradle is installed through SDKMAN or another shell-only setup, set `GRADLE_COMMAND` to the absolute Gradle executable path and restart the server.
+
+**`spawn gradle ENOENT`**
+Node could not find `gradle` on its `PATH`. Either add Gradle to the service PATH or set `GRADLE_COMMAND`, for example:
+
+```env
+GRADLE_COMMAND=/root/.sdkman/candidates/gradle/9.5.1/bin/gradle
+```
 
 **Versions list shows only the fallback version**
 The Hytale Maven repository is unreachable or returned an unexpected response. The app continues to work with the built-in fallback list. Check `HYTALE_MAVEN_RELEASE_URL` / `HYTALE_MAVEN_PRERELEASE_URL` in your `.env` if you expect live versions.

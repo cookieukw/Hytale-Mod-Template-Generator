@@ -13,3 +13,5 @@ services:
       PORT: 3000
       APP_ORIGIN: "*"
       SHOW_STATUS_BANNER: "true"
+      GRADLE_DISTRIBUTION_URL: "https://services.gradle.org/distributions/gradle-9.5.1-bin.zip"
+      GRADLE_COMMAND: "/opt/gradle/bin/gradle"
