@@ -301,6 +301,12 @@ version = ${data.version}
 # Whether this mod includes an asset pack.
 includes_pack = ${data.includesPack}
 
+# Injects hosted Hytale API docs into generated Vineflower server sources for easier IDE browsing.
+inject_server_javadocs_into_sources = ${data.injectServerJavadocsIntoSources}
+
+# Optional path to a local Hytale installation, a directory containing Assets.zip, or an Assets.zip file. When set, local dev tasks use this assets zip directly instead of requiring the Gradle cached assets zip.
+generateAssetsBinary = ${data.generateAssetsBinary}
+
 # Whether this mod starts disabled by default.
 disabled_by_default = ${data.disabledByDefault}
 
@@ -681,6 +687,8 @@ hytaleTools {
     curseforgeId = property("${propertyKeyForModule(moduleName, 'curseforge_project_id')}").toString()
     disabledByDefault = property("disabled_by_default").toString().toBoolean()
     includesPack = property("includes_pack").toString().toBoolean()
+    injectServerJavadocsIntoSources = property("inject_server_javadocs_into_sources").toString().toBoolean()
+    generateAssetsBinary = property("generateAssetsBinary").toString().toBoolean()
     patchline = property("patchline").toString()
 }
 
@@ -725,6 +733,8 @@ hytaleTools {
     curseforgeId = project.property('${propertyKeyForModule(moduleName, 'curseforge_project_id')}').toString()
     disabledByDefault = project.disabled_by_default.toString().toBoolean()
     includesPack = project.includes_pack.toString().toBoolean()
+    injectServerJavadocsIntoSources = project.inject_server_javadocs_into_sources.toString().toBoolean()
+    generateAssetsBinary = project.generateAssetsBinary.toString().toBoolean()
     patchline = project.patchline.toString()
 }
 
@@ -786,6 +796,8 @@ hytaleTools {
     curseforgeId = property("curseforgeID").toString()
     disabledByDefault = property("disabled_by_default").toString().toBoolean()
     includesPack = property("includes_pack").toString().toBoolean()
+    injectServerJavadocsIntoSources = property("inject_server_javadocs_into_sources").toString().toBoolean()
+    generateAssetsBinary = property("generateAssetsBinary").toString().toBoolean()
     patchline = property("patchline").toString()
 }
 
@@ -847,6 +859,8 @@ hytaleTools {
     curseforgeId = project.curseforgeID.toString()
     disabledByDefault = project.disabled_by_default.toString().toBoolean()
     includesPack = project.includes_pack.toString().toBoolean()
+    injectServerJavadocsIntoSources = project.inject_server_javadocs_into_sources.toString().toBoolean()
+    generateAssetsBinary = project.generateAssetsBinary.toString().toBoolean()
     patchline = project.patchline.toString()
 }
 

@@ -41,6 +41,8 @@ export interface ProjectFormData {
   projectLanguage: ProjectLanguage;
   disabledByDefault: boolean;
   includesPack: boolean;
+  injectServerJavadocsIntoSources: boolean;
+  generateAssetsBinary: boolean;
   javaVersion: number;
   usePublisher: boolean;
   publishModtale: boolean;

@@ -21,6 +21,8 @@ export const defaultFormData: ProjectFormData = {
   javaVersion: 25,
   disabledByDefault: false,
   includesPack: true,
+  injectServerJavadocsIntoSources: true,
+  generateAssetsBinary: true,
   usePublisher: false,
   publishModtale: true,
   modtaleProjectId: '',

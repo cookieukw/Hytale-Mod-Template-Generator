@@ -65,6 +65,8 @@ const TOOLTIPS = {
   modLicense: 'The software license applied to your mod. A LICENSE file will be generated automatically.',
   modDescription: 'A short description of what your mod does. Written into the mod manifest.',
   includesPack: 'Whether your mod bundles an asset pack (textures, models, sounds, etc.).',
+  injectServerJavadocsIntoSources: 'Adds server Javadocs into downloaded/generated sources when supported by hytaleTools.',
+  generateAssetsBinary: 'Controls whether prepareDecompiledSourcesForIde / idea generate the large hytale-assets.jar IDE binary from Assets.zip. Disable to avoid creating the extra assets jar',
   disabledByDefault: 'If enabled, the mod will be disabled when first installed and must be manually enabled by the user.',
   usePublisher: 'Adds the HytalePublisher Gradle plugin to your project, enabling one-command publishing to mod platforms.',
   publishModtale: 'Publish to Modtale. Your Project ID is shown in the right-hand panel on your Modtale project page.',
@@ -322,6 +324,30 @@ export function ProjectForm({ value, versions, onChange, onSubmit, loading }: Pr
         <label className="checkbox">
           <input name="includesPack" type="checkbox" checked={value.includesPack} onChange={handleInput} />
           <span>Includes pack <Tooltip text={TOOLTIPS.includesPack} /></span>
+        </label>
+        <label className="checkbox">
+          <input
+            name="injectServerJavadocsIntoSources"
+            type="checkbox"
+            checked={value.injectServerJavadocsIntoSources}
+            onChange={handleInput}
+          />
+          <span>
+            Inject server Javadocs into sources{' '}
+            <Tooltip text={TOOLTIPS.injectServerJavadocsIntoSources} />
+          </span>
+        </label>
+        <label className="checkbox">
+          <input
+            name="generateAssetsBinary"
+            type="checkbox"
+            checked={value.generateAssetsBinary}
+            onChange={handleInput}
+          />
+          <span>
+            Generate the large hytale-assets.jar IDE binary{' '}
+            <Tooltip text={TOOLTIPS.generateAssetsBinary} />
+          </span>
         </label>
         <label className="checkbox">
           <input name="disabledByDefault" type="checkbox" checked={value.disabledByDefault} onChange={handleInput} />
