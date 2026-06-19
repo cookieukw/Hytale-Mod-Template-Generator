@@ -664,6 +664,11 @@ ${data.projectLanguage === 'kotlin' ? `    kotlin("jvm") version "${KOTLIN_VERSI
 
 group = property("group").toString()
 
+tasks.named<Jar>("jar") {
+  archiveBaseName.set(project.property("mod_name").toString())
+  archiveVersion.set(project.property("version").toString())
+}
+
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(property("java_version").toString().toInt()))
 }
@@ -712,6 +717,10 @@ group = project.group
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+}
+
+base {
+  archivesName = project.mod_name.toString()
 }
 
 dependencies {
@@ -777,6 +786,11 @@ tasks.withType<Javadoc>().configureEach {
 
 group = project.property("group").toString()
 
+tasks.named<Jar>("jar") {
+  archiveBaseName.set(project.property("mod_name").toString())
+  archiveVersion.set(project.property("version").toString())
+}
+
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(property("java_version").toString().toInt()))
 }
@@ -839,6 +853,10 @@ javadoc {
 }
 
 group = project.group
+
+base {
+  archivesName = project.mod_name.toString()
+}
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(java_version)
@@ -929,4 +947,5 @@ run/
 .classpath
 .project
 .settings/
+.vscode
 `;
