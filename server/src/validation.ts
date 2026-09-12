@@ -101,7 +101,7 @@ export const projectInputSchema = z.object({
   buildDsl: z.enum(['groovy', 'kotlin']).default('groovy'),
   projectLanguage: z.enum(['java', 'kotlin']).default('java'),
   javaVersion: z.coerce.number().int().default(25),
-  manifestDependencies: z.string().default('Hytale:AssetModule=*'),
+  manifestDependencies: z.string().default('Hytale:AssetModule=*,Hytale:EntityModule=*'),
   manifestOptionalDependencies: z.string().default(''),
   curseforgeID: z.string().default(''),
   disabledByDefault: z.boolean().default(false),
