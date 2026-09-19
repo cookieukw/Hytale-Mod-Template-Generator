@@ -8,6 +8,7 @@ import type { ProjectFormData } from './types';
 import type { PreviewResponse } from './lib/api';
 import { buildShareUrl, readFormDataFromUrl, writeFormDataToUrl } from './lib/share-url';
 import { PRESETS } from './lib/presets';
+import { Home, Package, Code2 } from 'lucide-react';
 
 const FALLBACK_VERSION = '2026.02.19-1a311a592';
 
@@ -295,47 +296,31 @@ export function App() {
 
   return (
     <>
-      {/* Background layers */}
-      <div className="os-grid" aria-hidden="true" />
-      <div className="scanlines" aria-hidden="true" />
-      <div className="ambient" aria-hidden="true" />
-
       <header className="site-header">
         <a className="site-header-brand" href="https://azuredoom.com" target="_blank" rel="noopener noreferrer">
-          <span>Azure</span>Doom
+          AzureDoom
         </a>
 
         <nav className="site-header-links" aria-label="External links">
-          <a href="https://azuredoom.com" target="_blank" rel="noopener noreferrer">
-            Home
+          <a href="https://azuredoom.com" target="_blank" rel="noopener noreferrer" aria-label="Home" title="Home">
+            <Home size={20} />
           </a>
-          <a href="https://maven.azuredoom.com/#/" target="_blank" rel="noopener noreferrer">
-            Maven
+          <a href="https://maven.azuredoom.com/#/" target="_blank" rel="noopener noreferrer" aria-label="Maven" title="Maven">
+            <Package size={20} />
           </a>
-          <a href="https://github.com/AzureDoom/Hytale-Mod-Template-Generator" target="_blank" rel="noopener noreferrer">
-            Source
+          <a href="https://github.com/AzureDoom/Hytale-Mod-Template-Generator" target="_blank" rel="noopener noreferrer" aria-label="Source" title="Source">
+            <Code2 size={20} />
           </a>
         </nav>
       </header>
 
       <div className="shell">
-        {/* Hero */}
         <section className="hero">
-          <svg className="hero-ring" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <polygon points="240,20 440,130 440,350 240,460 40,350 40,130" fill="none" stroke="#00f0ff" strokeWidth="1.5" />
-            <polygon points="240,50 415,147 415,333 240,430 65,333 65,147" fill="none" stroke="#00f0ff" strokeWidth="0.5" />
-            <polygon points="240,80 390,165 390,315 240,400 90,315 90,165" fill="none" stroke="#00f0ff" strokeWidth="0.25" />
-            <line x1="240" y1="20" x2="240" y2="460" stroke="#00f0ff" strokeWidth="0.3" />
-            <line x1="40" y1="130" x2="440" y2="350" stroke="#00f0ff" strokeWidth="0.3" />
-            <line x1="440" y1="130" x2="40" y2="350" stroke="#00f0ff" strokeWidth="0.3" />
-          </svg>
-
           <div>
-            <div className="hero-eyebrow">MOD TEMPLATE GENERATOR</div>
             <h1 className="hero-title">
-              <span>Hytale</span> Mod Generator
+              Hytale Mod Generator
             </h1>
-            <div className="hero-subtitle">CONFIGURE · GENERATE · BUILD</div>
+            <div className="hero-subtitle">Configure and generate your Hytale mod template</div>
           </div>
         </section>
 
@@ -351,20 +336,9 @@ export function App() {
 
         {/* Main panel */}
         <div className="layout">
-          <div className="os-panel">
-            <span className="os-panel-corner-tr" aria-hidden="true" />
-            <span className="os-panel-corner-bl" aria-hidden="true" />
-
+          <div className="panel">
             <div className="panel-titlebar">
-              <span className="panel-titlebar-id">
-                {activeTab === 'settings' ? 'GEN::001' : 'OUT::002'}
-              </span>
               <h2>{activeTab === 'settings' ? 'Project settings' : 'Output preview'}</h2>
-              <div className="panel-titlebar-dots">
-                <span />
-                <span />
-                <span />
-              </div>
             </div>
 
             <div className="tab-row" role="tablist" aria-label="Generator sections">
@@ -427,13 +401,12 @@ export function App() {
           </div>
         </div>
 
-        <footer className="os-footer">
-          © 2026 AzureDoom |
-          <a href="#/status">System status</a>
-          {' '}|{' '}
-          <a href="https://github.com/AzureDoom/Hytale-Mod-Template-Generator" target="_blank" rel="noopener noreferrer">
-            Source
-          </a>
+        <footer className="footer">
+          <p>© 2026 AzureDoom</p>
+          <div className="footer-links">
+            <a href="#/status">System Status</a>
+            <a href="https://github.com/AzureDoom/Hytale-Mod-Template-Generator" target="_blank" rel="noopener noreferrer">Source Code</a>
+          </div>
         </footer>
       </div>
     </>
