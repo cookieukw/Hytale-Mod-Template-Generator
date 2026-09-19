@@ -1,5 +1,6 @@
 import type { ChangeEvent } from 'react';
 import type { ProjectFormData } from '../types';
+import { Loader2, Download } from 'lucide-react';
 
 function getAuthorError(value: string) {
   const authors = value
@@ -436,12 +437,22 @@ export function ProjectForm({ value, versions, onChange, onSubmit, loading }: Pr
       </div>
 
       <button
-        className="full-width"
+        className="full-width with-icon"
         onClick={onSubmit}
         disabled={loading || hasErrors || Boolean(authorError)}
         title={hasErrors || authorError ? 'Fix the highlighted fields before generating.' : undefined}
       >
-        {loading ? 'Generating…' : 'Generate Zip'}
+        {loading ? (
+          <>
+            <Loader2 className="spinner" size={18} />
+            Gerando Projeto...
+          </>
+        ) : (
+          <>
+            <Download size={18} />
+            Gerar Projeto (ZIP)
+          </>
+        )}
       </button>
     </>
   );
